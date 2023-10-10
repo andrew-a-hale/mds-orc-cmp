@@ -1,0 +1,18 @@
+dag_id: salaries
+version: "0.0.0.9000"
+schedule: "@daily"
+failure_callback_recipient:
+  - me@cognizant.com
+start_datetime_string: "2023-01-01 00:00:00"
+retries: 1
+max_active_runs: 1
+catchup: False
+depends_on_past: False
+datalake: /opt/airflow/datalake
+countries:
+  - AU
+  - NZ
+  - CN
+  - IN
+  - US
+  - CA
