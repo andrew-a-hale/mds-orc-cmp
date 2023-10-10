@@ -6,3 +6,4 @@ To Do:
 - [] Dagster
 - [] Prefect
 - [] Temporal
+- [] Specify Dependencies
