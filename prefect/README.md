@@ -1,6 +1,9 @@
 # Prefect
 Simple DAG example in Airflow to do ELT for some salary data.
 
+# How-to
+?
+
 Todo:
 1. Write DAG
 2. Testing
