@@ -7,9 +7,9 @@ Issues relating to how the Orchestrator runs on infrastructure will not be teste
 # Focus
 The focus here will be to test how workflows are defined and executed, and not the ease of building tasks. The point of the project is to compare the tools as Orchestrators, not whole Data Pipeline solutions. I believe to build effective Data Pipelines several tools should be composed together.
 
-To Do:
-- [] Airflow
-- [] Dagster
-- [] Prefect
-- [] Temporal
-- [] Specify Dependencies
+# To Do
+- [ ] Airflow
+- [ ] Dagster
+- [ ] Prefect
+- [ ] Temporal
+- [ ] Specify Dependencies
