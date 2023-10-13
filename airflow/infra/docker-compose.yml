@@ -71,7 +71,7 @@ x-airflow-common:
     AIRFLOW_HOME: .
   volumes:
     - ${AIRFLOW_HOME:-.}/../dags:/opt/airflow/dags
-    - ${AIRFLOW_HOME:-.}/../datalake:/opt/airflow/datalake
+    - ${AIRFLOW_HOME:-.}/../dags/project/salaries/dbt/target:/opt/airflow/datalake
     - ${AIRFLOW_HOME:-.}/../logs:/opt/airflow/logs
     - ${AIRFLOW_HOME:-.}/../plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
