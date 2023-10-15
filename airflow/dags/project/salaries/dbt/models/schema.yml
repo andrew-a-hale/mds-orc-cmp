@@ -1,15 +1,20 @@
 version: 2
 
 models:
-  - name: agg
-  columns:
-    - country
-      tests: not_null
-    - loaded_at
-      tests: not_null
   - name: salaries
-  columns:
-    - country
-      tests: not_null
-    - loaded_at
-      tests: not_null
+    columns:
+      - name: country
+        tests:
+          - not_null
+      - name: loaded_at
+        tests:
+          - not_null
+
+  - name: agg
+    columns:
+      - name: country
+        tests:
+          - not_null
+      - name: loaded_at
+        tests: 
+          - not_null

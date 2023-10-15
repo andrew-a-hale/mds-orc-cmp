@@ -16,7 +16,7 @@ jobs:
         run: pip install flake8
 
       - name: Run flake8
-        run: flake8 data-testing-with-airflow/dags/
+        run: flake8 airflow/dags/
 
   integrity_test:
     runs-on: ubuntu-latest
@@ -28,13 +28,13 @@ jobs:
           python-version: '3.10'
 
       - name: Install integrity test requirements
-        run: pip install -r data-testing-with-airflow/integrity_tests/requirements.txt
+        run: pip install -r airflow/integrity_tests/requirements.txt
 
       - name: Initialize Airflow DB
         run: airflow db init
 
       - name: Run integrity tests
-        run: coverage run -m pytest data-testing-with-airflow/integrity_tests/*
+        run: coverage run -m pytest airflow/integrity_tests/*
 
   mock_pipeline_test:
     runs-on: ubuntu-latest
@@ -49,19 +49,23 @@ jobs:
           python-version: '3.10'
 
       - name: Install system dependencies
-        run: sudo apt-get install -y libsasl2-dev build-essential
+        run: sudo apt-get install -y build-essential duckdb
 
       - name: Install mock_pipeline test requirements
-        run: pip install -r data-testing-with-airflow/mock_pipeline_requirements.txt
+        run: pip install -r airflow/mock_pipeline_requirements.txt
+
+      - name: Make mock db
+        run: duckdb airflow/dags/project/salaries/dbt/local/db.duckdb
 
       - name: Generate mock-pipeline data
-        run: spark-submit --name spark-data-generate data-testing-with-airflow/dags/spark/generate_data.py --warehouse-path data-testing-with-airflow/spark-warehouse
+        working-directory: airflow/dags/project/salaries/dbt
+        run: dbt seed --models mock
 
       - name: Run dbt
-        working-directory: data-testing-with-airflow/dags/dbt
+        working-directory: airflow/dags/dbt
         run : dbt run --target mock_pipeline
 
       - name: Run dbt tests
-        working-directory: data-testing-with-airflow/dags/dbt
+        working-directory: airflow/dags/dbt
         run : dbt test --target mock_pipeline
 

@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 import yaml
 from airflow.models import DAG
@@ -11,6 +12,7 @@ from project.salaries import tasks
 
 
 PATH = os.path.dirname(__file__)
+DBT_DIR = f"{PATH}/dbt"
 CONFIG = yaml.safe_load(open(f"{PATH}/config.yml"))
 
 dag = DAG(
@@ -37,37 +39,41 @@ for country in countries:
         dag=dag,
         task_id=f"validate_extract_{country}",
         python_callable=tasks.validate_extract,
-        op_kwargs={
-            "config": CONFIG,
-            "country": country,
-            "loaded_at": extract.xcom_pull(key="loaded_at")
-        }
+        op_args=[country],
     )
 
-    load = PythonOperator(
+    loaded_at = int(time.time())
+    vars = f"csv_file: {CONFIG.get('datalake')}/{country}/salaries.csv"
+    load = BashOperator(
         dag=dag,
         task_id=f"load_{country}",
-        python_callable=tasks.load,
-        op_args=[CONFIG, country],
+        bash_command=f"dbt run --model salaries --vars '{vars}'",
     )
 
+    vars = f"{{country: {country}, loaded_at: {loaded_at}}}"    
     validate_load = BashOperator(
         dag=dag,
         task_id=f"validate_load_{country}",
-        bash_command=f"dbt test --model salaries --var country={country} --var loaded_at={extract.xcom_pull(key='loaded_at')}",
+        bash_command=f"dbt test --model salaries --vars '{vars}'",
     )
 
     tasks_list.append(extract >> validate_extract >> load >> validate_load)
 
-transform = PythonOperator(
-    dag=dag, task_id="transform", python_callable=tasks.transform, op_args=[CONFIG]
+loaded_at = int(time.time())
+transform = BashOperator(
+    dag=dag,
+    task_id=f"transform",
+    bash_command=f"dbt run --model agg",
 )
 
 validate_transform = BashOperator(
     dag=dag,
     task_id=f"validate_transform",
-    bash_command=f"dbt test --model agg --var loaded_at={extract.xcom_pull(key='loaded_at')}",
+    bash_command=f"dbt test --model agg --vars 'loaded_at: {loaded_at}'",
 )
 
 # dag
 tasks_list >> transform >> validate_transform
+
+if __name__ == "__main__":
+    dag.test()
