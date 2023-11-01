@@ -1,6 +1,0 @@
-salaries:
-  target: local
-  outputs:
-    local:
-      type: duckdb
-      path: /opt/airflow/local/db.duckdb

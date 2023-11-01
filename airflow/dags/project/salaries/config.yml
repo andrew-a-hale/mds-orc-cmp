@@ -9,6 +9,7 @@ max_active_runs: 1
 catchup: False
 depends_on_past: False
 datalake: /opt/airflow/datalake
+db_conn: /opt/airflow/datalake/db.duckdb
 countries:
   - AU
   - NZ

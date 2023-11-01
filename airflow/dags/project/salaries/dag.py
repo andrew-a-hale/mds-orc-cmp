@@ -12,7 +12,6 @@ from project.salaries import tasks
 
 
 PATH = os.path.dirname(__file__)
-DBT_DIR = f"{PATH}/dbt"
 CONFIG = yaml.safe_load(open(f"{PATH}/config.yml"))
 
 dag = DAG(
@@ -42,34 +41,34 @@ for country in countries:
         op_args=[country],
     )
 
-    loaded_at = int(time.time())
-    vars = f"csv_file: {CONFIG.get('datalake')}/{country}/salaries.csv"
-    load = BashOperator(
+    load = PythonOperator(
         dag=dag,
         task_id=f"load_{country}",
-        bash_command=f"dbt run --model salaries --vars '{vars}'",
+        python_callable=tasks.load,
+        op_args=[CONFIG, country],
     )
 
-    vars = f"{{country: {country}, loaded_at: {loaded_at}}}"    
-    validate_load = BashOperator(
+    validate_load = PythonOperator(
         dag=dag,
         task_id=f"validate_load_{country}",
-        bash_command=f"dbt test --model salaries --vars '{vars}'",
+        python_callable=tasks.validate_load,
+        op_args=[CONFIG, country],
     )
 
     tasks_list.append(extract >> validate_extract >> load >> validate_load)
 
-loaded_at = int(time.time())
-transform = BashOperator(
+transform = PythonOperator(
     dag=dag,
     task_id=f"transform",
-    bash_command=f"dbt run --model agg",
+    python_callable=tasks.transform,
+    op_args=[CONFIG],
 )
 
-validate_transform = BashOperator(
+validate_transform = PythonOperator(
     dag=dag,
     task_id=f"validate_transform",
-    bash_command=f"dbt test --model agg --vars 'loaded_at: {loaded_at}'",
+    python_callable=tasks.validate_transform,
+    op_args=[CONFIG],
 )
 
 # dag
