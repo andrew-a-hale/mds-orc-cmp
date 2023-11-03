@@ -3,6 +3,10 @@
 **/__pycache__
 **/.pytest_cache
 
+dagster/project/data
+tmp*
+dagster/tutorial
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
