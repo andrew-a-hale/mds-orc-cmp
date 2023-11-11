@@ -16,12 +16,16 @@ deployment_resources = {
     "local": {
         "salary_api": SalaryAPIResource(),
         "io_manager": FilesystemIOManager(base_dir="data"),
-        "db_io_manager": DuckDBPandasIOManager(database="data/salaries.duckdb", schema="hr"),
+        "db_io_manager": DuckDBPandasIOManager(
+            database="data/salaries.duckdb", schema="hr"
+        ),
     },
     "production": {
         "salary_api": SalaryAPIResource(),
         "io_manager": FilesystemIOManager(base_dir="data"),
-        "db_io_manager": DuckDBPandasIOManager(database="data/salaries.duckdb", schema="hr"),
+        "db_io_manager": DuckDBPandasIOManager(
+            database="data/salaries.duckdb", schema="hr"
+        ),
     },
 }
 
