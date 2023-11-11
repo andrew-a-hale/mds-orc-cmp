@@ -1,9 +1,11 @@
-from pydantic import Field
-from dataclasses import dataclass, asdict
-from typing import List
-from dagster import ConfigurableResource
-import requests
 import time
+from dataclasses import asdict, dataclass
+from typing import List
+
+import requests
+from pydantic import Field
+
+from dagster import ConfigurableResource
 
 
 @dataclass
@@ -72,16 +74,12 @@ class SalaryAPI:
 
 
 class SalaryAPIResource(ConfigurableResource):
-    countries: str = Field(
-        description="A list of countries available in the salary_api as a comma separated list"
-    )
-
     @property
     def fetch(self) -> SalaryAPI:
         return SalaryAPI()
 
-    def get_salaries(self) -> List[Salary]:
-        return self.fetch.get_salaries_for_country(self.country)
+    def get_salaries(self, country) -> List[Salary]:
+        return self.fetch.get_salaries_for_country(country)
 
     def get_salaries_for_countries(self) -> List[Salary]:
         result = []

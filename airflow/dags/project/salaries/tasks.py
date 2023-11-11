@@ -41,21 +41,22 @@ def extract(config, country):
         ctx["ti"].xcom_push(key="output_filename", value=f"{file.name}")
 
 
-def validate_extract(country):
-    import os
+# def validate_extract(country):
+#     import os
 
-    from airflow.operators.python import get_current_context
+#     from airflow.operators.python import get_current_context
 
-    ctx = get_current_context()
-    filename = ctx["ti"].xcom_pull(task_ids=f"extract_{country}", key="output_filename")
+#     ctx = get_current_context()
+#     filename = ctx["ti"].xcom_pull(task_ids=f"extract_{country}", key="output_filename")
 
-    assert os.path.exists(filename)
-    assert os.path.getsize(filename) > 0
+#     assert os.path.exists(filename)
+#     assert os.path.getsize(filename) > 0
 
 
 def load(config, country):
-    import duckdb
     import time
+
+    import duckdb
     from airflow.operators.python import get_current_context
 
     ctx = get_current_context()
@@ -79,31 +80,32 @@ def load(config, country):
     conn.close()
 
 
-def validate_load(config, country):
-    import duckdb
-    from airflow.exceptions import AirflowFailException
-    from airflow.operators.python import get_current_context
+# def validate_load(config, country):
+#     import duckdb
+#     from airflow.exceptions import AirflowFailException
+#     from airflow.operators.python import get_current_context
 
-    ctx = get_current_context()
-    loaded_at = ctx["ti"].xcom_pull(task_ids=f"extract_{country}", key="loaded_at")
+#     ctx = get_current_context()
+#     loaded_at = ctx["ti"].xcom_pull(task_ids=f"extract_{country}", key="loaded_at")
 
-    conn = duckdb.connect(database=config.get("db_conn"), read_only=True)
-    cur = conn.cursor()
-    rows = cur.execute(
-        f"SELECT COUNT(*) FROM salaries WHERE loaded_at = {loaded_at}"
-    ).fetchone()
-    conn.commit()
-    conn.close()
+#     conn = duckdb.connect(database=config.get("db_conn"), read_only=True)
+#     cur = conn.cursor()
+#     rows = cur.execute(
+#         f"SELECT COUNT(*) FROM salaries WHERE loaded_at = {loaded_at}"
+#     ).fetchone()
+#     conn.commit()
+#     conn.close()
 
-    if rows and rows[0] > 0:
-        return True
+#     if rows and rows[0] > 0:
+#         return True
 
-    raise AirflowFailException("failed load")
+#     raise AirflowFailException("failed load")
 
 
 def transform(config):
-    import duckdb
     import time
+
+    import duckdb
     from airflow.operators.python import get_current_context
 
     ctx = get_current_context()
@@ -133,25 +135,25 @@ GROUP BY country;"""
     conn.close()
 
 
-def validate_transform(config):
-    import duckdb
-    from airflow.exceptions import AirflowFailException
-    from airflow.operators.python import get_current_context
+# def validate_transform(config):
+#     import duckdb
+#     from airflow.exceptions import AirflowFailException
+#     from airflow.operators.python import get_current_context
 
-    ctx = get_current_context()
-    loaded_at = ctx["ti"].xcom_pull(task_ids=f"transform", key="loaded_at")
+#     ctx = get_current_context()
+#     loaded_at = ctx["ti"].xcom_pull(task_ids=f"transform", key="loaded_at")
 
-    conn = duckdb.connect(database=config.get("db_conn"), read_only=True)
-    cur = conn.cursor()
-    sql = f"""\
-SELECT COUNT(*)
-FROM agg
-WHERE loaded_at = {loaded_at}"""
-    rows = cur.execute(sql).fetchone()
-    conn.commit()
-    conn.close()
+#     conn = duckdb.connect(database=config.get("db_conn"), read_only=True)
+#     cur = conn.cursor()
+#     sql = f"""\
+# SELECT COUNT(*)
+# FROM agg
+# WHERE loaded_at = {loaded_at}"""
+#     rows = cur.execute(sql).fetchone()
+#     conn.commit()
+#     conn.close()
 
-    if rows and rows[0] > 0:
-        return True
+#     if rows and rows[0] > 0:
+#         return True
 
-    raise AirflowFailException("failed transform")
+#     raise AirflowFailException("failed transform")

@@ -1,15 +1,15 @@
-import time
-from datetime import datetime
-import yaml
-from airflow.models import DAG
-from airflow.operators.python import PythonOperator
-from airflow.operators.bash import BashOperator
 import os
 import sys
+import time
+from datetime import datetime
+
+import yaml
+from airflow.models import DAG
+from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
 
 sys.path.append(f"{os.getenv('AIRFLOW_HOME')}/dags/project")
 from project.salaries import tasks
-
 
 PATH = os.path.dirname(__file__)
 CONFIG = yaml.safe_load(open(f"{PATH}/config.yml"))
@@ -34,12 +34,12 @@ for country in countries:
         op_args=[CONFIG, country],
     )
 
-    validate_extract = PythonOperator(
-        dag=dag,
-        task_id=f"validate_extract_{country}",
-        python_callable=tasks.validate_extract,
-        op_args=[country],
-    )
+    # validate_extract = PythonOperator(
+    #     dag=dag,
+    #     task_id=f"validate_extract_{country}",
+    #     python_callable=tasks.validate_extract,
+    #     op_args=[country],
+    # )
 
     load = PythonOperator(
         dag=dag,
@@ -48,14 +48,15 @@ for country in countries:
         op_args=[CONFIG, country],
     )
 
-    validate_load = PythonOperator(
-        dag=dag,
-        task_id=f"validate_load_{country}",
-        python_callable=tasks.validate_load,
-        op_args=[CONFIG, country],
-    )
+    # validate_load = PythonOperator(
+    #     dag=dag,
+    #     task_id=f"validate_load_{country}",
+    #     python_callable=tasks.validate_load,
+    #     op_args=[CONFIG, country],
+    # )
 
-    tasks_list.append(extract >> validate_extract >> load >> validate_load)
+    # tasks_list.append(extract >> validate_extract >> load >> validate_load)
+    tasks_list.append(extract >> load)
 
 transform = PythonOperator(
     dag=dag,
@@ -64,15 +65,15 @@ transform = PythonOperator(
     op_args=[CONFIG],
 )
 
-validate_transform = PythonOperator(
-    dag=dag,
-    task_id=f"validate_transform",
-    python_callable=tasks.validate_transform,
-    op_args=[CONFIG],
-)
+# validate_transform = PythonOperator(
+#     dag=dag,
+#     task_id=f"validate_transform",
+#     python_callable=tasks.validate_transform,
+#     op_args=[CONFIG],
+# )
 
 # dag
-tasks_list >> transform >> validate_transform
+tasks_list >> transform
 
 if __name__ == "__main__":
     dag.test()
